@@ -1,5 +1,6 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.utils import timezone
 
 # Create your views here.
 from django.template import loader
@@ -16,12 +17,19 @@ class IndexView(generic.ListView):
 
     def get_queryset(self):
         """Return the last five published questions."""
-        return Question.objects.order_by('-pub_date')
+        # return Question.objects.order_by('-pub_date')
+        return Question.objects.filter(
+            pub_date__lte=timezone.now()
+        ).order_by('-pub_date')
 
 
 class DetailView(generic.DetailView):
     model = Question
     template_name = 'poll/detail.html'
+
+    def get_queryset(self):
+        """Exclude the future Question"""
+        return Question.objects.filter(pub_date__lte=timezone.now())
 
 
 class ResultsView(generic.DetailView):
